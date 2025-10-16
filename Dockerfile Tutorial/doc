@@ -1,0 +1,60 @@
+# Dockerfile (place in project root)
+
+# Stage 1: The "Base" image with pnpm
+FROM node:24-alpine AS base
+WORKDIR /app
+RUN npm install -g pnpm
+
+# Stage 2: The "Pruner"
+# This stage creates a pruned version of the monorepo for a specific app
+FROM base AS pruner
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install
+COPY . .
+ARG app_name
+RUN pnpm turbo prune ${app_name} --docker
+
+# Stage 3: The "Builder"
+# This stage's ONLY job is to build the TypeScript code.
+FROM base AS builder
+WORKDIR /app
+
+COPY --from=pruner /app/out/json .
+COPY --from=pruner /app/out/pnpm-lock.yaml .
+COPY --from=pruner /app/out/full .
+
+# Install ALL dependencies (including devDependencies) to get the build tools
+RUN pnpm install
+ARG app_name
+RUN pnpm turbo run build --filter=${app_name}
+
+RUN pnpm deploy --prod --filter=${app_name} ./deploy
+
+# Stage 4: The "Runner"
+# This is the final, small image that runs the application
+FROM base AS runner
+WORKDIR /app
+
+ARG app_name
+
+# Create a non-root user and group
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 appuser
+
+COPY --from=builder /app/deploy .
+
+# Ensure Unix line endings and executable bit for entrypoint
+# RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
+# Optionally force running via sh (works even if shebang is missing)
+# ENTRYPOINT ["sh", "/usr/local/bin/docker-entrypoint.sh"]
+
+# Change ownership of all files to the non-root user
+RUN chown -R appuser:nodejs /app
+
+# Switch to the non-root user
+USER appuser
+
+EXPOSE 3000 3001 3002
+CMD ["node", "dist/index.js"]

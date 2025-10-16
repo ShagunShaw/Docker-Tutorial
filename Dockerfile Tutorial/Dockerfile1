@@ -1,0 +1,56 @@
+# Comment (never to be included in the same line of a command)
+
+# First line of every Dockerfile must be a FROM instruction    
+# Base image with a specific version (written after the colon (:)  )
+FROM alpine:3.18
+
+# Base image with a given tag ('base2')
+FROM node:24-alpine AS base2
+
+RUN echo "This is a test Dockerfile"
+RUN apk add curl      
+
+# to set the working directory for any RUN, CMD, ENTRYPOINT, COPY and ADD instructions that follow it in the Dockerfile
+# If the folder does not exist, it will be created
+WORKDIR /folder_name
+
+# to add new user
+RUN adduser -D user_name1
+RUN adduser -D user_name2
+
+
+# to set the user name or UID to use when running the image and for any RUN, CMD and ENTRYPOINT instructions that follow it in the Dockerfile
+# before running this command, make sure the user is created
+USER user_name1
+
+# Setting up environment variables
+ENV app_host= "localhost"
+ENV app_port= "8080"
+ENV db_url= "http://mongodb:27017/url.com"
+
+# to copy files from host machine to the image
+COPY   app.py   /folder_name/app.py
+
+# same as COPY but can download files from our local pc as well as from an URL
+ADD   https://raw.githubusercontent.com/requirements.txt   /folder_name/requirements.txt
+
+# to expose a port number, which you have to further map while running the container
+EXPOSE 8080
+
+
+# most important command, to run at the very end of the Dockerfile
+# for python app
+CMD ["python", "app.py"]
+#       OR
+ENTRYPOINT ["python", "app.py"]
+
+# for node app
+CMD ["node", "app.js"]
+#       OR
+ENTRYPOINT ["node", "app.js"]
+
+# for npm
+CMD ["npm", "run", "dev"]
+        # OR
+ENTRYPOINT ["npm", "run"]
+CMD ["dev"]
