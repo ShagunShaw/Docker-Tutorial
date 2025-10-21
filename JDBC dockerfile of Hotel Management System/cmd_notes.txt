@@ -1,0 +1,162 @@
+Microsoft Windows [Version 10.0.19045.6456]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\Dell>docker run --name javasql -e MYSQL_ROOT_PASSWORD=12345678 -d -p 3300:3306 mysql:latest
+095a8cb5a6342c7650f682cf773cf09ada53abf0d7d394510dd1169bba665154
+
+C:\Users\Dell>docker ps
+CONTAINER ID   IMAGE          COMMAND                  CREATED              STATUS              PORTS                                         NAMES
+095a8cb5a634   mysql:latest   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:3300->3306/tcp, [::]:3300->3306/tcp   javasql
+
+C:\Users\Dell>docker exec -it javasql mysql -u root -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 9.4.0 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+4 rows in set (0.010 sec)
+
+mysql> create database mydatabase;
+Query OK, 1 row affected (0.019 sec)
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mydatabase         |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+5 rows in set (0.001 sec)
+
+mysql> use mydatabase;
+Database changed
+mysql> create table if not exists table1(id int primary key AUTO_INCREMENT, name varchar(20));
+Query OK, 0 rows affected (0.046 sec)
+
+mysql> describe table1;
++-------+-------------+------+-----+---------+----------------+
+| Field | Type        | Null | Key | Default | Extra          |
++-------+-------------+------+-----+---------+----------------+
+| id    | int         | NO   | PRI | NULL    | auto_increment |
+| name  | varchar(20) | YES  |     | NULL    |                |
++-------+-------------+------+-----+---------+----------------+
+2 rows in set (0.010 sec)
+
+mysql> ^DBye
+
+C:\Users\Dell>docker stop javasql
+javasql
+
+C:\Users\Dell>docker exec -it javasql mysql -u root -p
+Error response from daemon: container 095a8cb5a6342c7650f682cf773cf09ada53abf0d7d394510dd1169bba665154 is not running
+
+C:\Users\Dell>docker start javasql
+javasql
+
+C:\Users\Dell>docker exec -it javasql mysql -u root -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 9.4.0 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mydatabase         |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+5 rows in set (0.024 sec)
+
+mysql> use mydatabse;
+ERROR 1049 (42000): Unknown database 'mydatabse'
+mysql> use mydatabase;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> describe table1;
++-------+-------------+------+-----+---------+----------------+
+| Field | Type        | Null | Key | Default | Extra          |
++-------+-------------+------+-----+---------+----------------+
+| id    | int         | NO   | PRI | NULL    | auto_increment |
+| name  | varchar(20) | YES  |     | NULL    |                |
++-------+-------------+------+-----+---------+----------------+
+2 rows in set (0.006 sec)
+
+mysql> ^DBye
+
+C:\Users\Dell>docker stop javasql
+javasql
+
+C:\Users\Dell>docker run --name javasql2 -e MYSQL_ROOT_PASSWORD=12345678 -d -p 3300:3306 mysql:latest
+79c606ad99bfcc4696c57d109d7edf182d6e0d4018b27f6cb4fe705fa5fdbe4b
+
+C:\Users\Dell>docker start javasql2
+javasql2
+
+C:\Users\Dell>docker exec -it javasql mysql -u root -p
+Error response from daemon: container 095a8cb5a6342c7650f682cf773cf09ada53abf0d7d394510dd1169bba665154 is not running
+
+C:\Users\Dell>docker exec -it javasql2 mysql -u root -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 9.4.0 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+4 rows in set (0.009 sec)
+
+mysql> ^DBye
+
+C:\Users\Dell>docker stop javasql2
+javasql2
+
+C:\Users\Dell>
