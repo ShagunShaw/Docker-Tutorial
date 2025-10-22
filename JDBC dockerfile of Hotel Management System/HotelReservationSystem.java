@@ -68,11 +68,13 @@ public class HotelReservationSystem {
         }
         catch (SQLException e)
         {
-            System.err.println("SQL error: " + e.getMessage());
+            System.err.println("SQL error: " + e.getMessage() + " and the stacktrace is: " + e.getStackTrace());
+            System.exit(1);
         }
         catch (Exception e) 
         {
-            System.err.println("Error: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage() + " and the stacktrace is: " + e.getStackTrace());
+            System.exit(1);
         }
     }
 

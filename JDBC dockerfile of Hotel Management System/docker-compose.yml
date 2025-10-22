@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   javasql:
     image: mysql
@@ -8,9 +6,12 @@ services:
       - "3300:3306"
     environment:
       MYSQL_ROOT_PASSWORD: 12345678
-      # THIS IS IMPORTANT: Tells MySQL to create this database immediately
-      # MYSQL_DATABASE: my_java_db 
-    volumes:
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:            
       - ./script.sql:/docker-entrypoint-initdb.d/init.sql
       - mysql-data:/var/lib/mysql
 
@@ -26,8 +27,11 @@ services:
       DB_PASSWORD: 12345678
     # IMPORTANT: Wait for the database service (javasql) to be ready before starting the app
     depends_on:
-      - javasql
+      javasql:
+        # Without this 'condition', your Java app might start before the DB is ready, causing connection errors.
+        condition: service_healthy
 
 volumes:
-  # This declares the named volume 'mysql-data' so the javasql service can use it.
+  # This declares the named volume 'mysql-data' so the javasql service can use it. In this the data will persist even if the container is removed or recreated as
+  # the data is stored in the volume outside the container's lifecycle i.e. the volumes are independent of the container's lifecycle.
   mysql-data:
